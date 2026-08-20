@@ -432,12 +432,18 @@ async function carregarListaMateriais() {
       const data2 = new Date(m.dataCriacao);
       html += '<div class="material-item"><div class="info"><strong>' + m.titulo + '</strong>' +
         '<span>' + data2.toLocaleDateString('pt-BR') + '</span></div>' +
-        '<button class="secondary" data-id="' + m.id + '">Abrir</button></div>';
+        '<div style="display:flex; gap:8px;">' +
+        '<button class="secondary" data-id="' + m.id + '">Abrir</button>' +
+        '<button class="secondary" data-del="' + m.id + '" style="color:var(--red); border-color:#F0C9C4;">Excluir</button>' +
+        '</div></div>';
     });
     html += '</div>';
     area.innerHTML = html;
     area.querySelectorAll('button[data-id]').forEach(b => {
       b.addEventListener('click', () => abrirMaterialSalvo(b.dataset.id));
+    });
+    area.querySelectorAll('button[data-del]').forEach(b => {
+      b.addEventListener('click', () => excluirMaterialSalvo(b.dataset.del));
     });
   } catch (err) {
     area.innerHTML = '<div class="error-box">Erro ao carregar: ' + err.message + '</div>';
@@ -503,6 +509,16 @@ async function abrirMaterialSalvo(id) {
     document.querySelector('button[data-tab="resumo"]').click();
   } catch (err) {
     area.innerHTML = '<div class="error-box">Erro ao abrir: ' + err.message + '</div>';
+  }
+}
+
+async function excluirMaterialSalvo(id) {
+  if (!confirm('Tem certeza que quer excluir este caderno? O PDF e tudo que foi gerado (resumo, exercícios, dúvidas) serão apagados e não dá para desfazer.')) return;
+  try {
+    await chamarAPI({ action: 'excluirMaterial', id });
+    carregarListaMateriais();
+  } catch (err) {
+    alert('Erro ao excluir: ' + err.message);
   }
 }
 
